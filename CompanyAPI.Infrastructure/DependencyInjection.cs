@@ -1,5 +1,7 @@
 ﻿using CompanyAPI.Application.Common.Interfaces;
+using CompanyAPI.Application.Common.Interfaces.Companies;
 using CompanyAPI.Infrastructure.Data;
+using CompanyAPI.Infrastructure.Repositories.Companies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,8 +17,9 @@ namespace CompanyAPI.Infrastructure
                options.UseInMemoryDatabase("CompanyApiInMemoryDb"));
 
             services.AddScoped<ApplicationDbContext>();
+            services.AddScoped<ICompanyRepository, CompanyRepository>();
 
-           
+
             services.AddScoped<IApplicationDbContext>(provider =>
                 provider.GetRequiredService<ApplicationDbContext>());
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
