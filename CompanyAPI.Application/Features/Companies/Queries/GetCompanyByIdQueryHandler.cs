@@ -1,33 +1,45 @@
-﻿using CompanyAPI.Application.Common.Models;
+﻿using CompanyAPI.Application.Common.Interfaces.Companies;
+using CompanyAPI.Application.Common.Models;
 using CompanyAPI.Application.Features.Companies.DTOs;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace CompanyAPI.Application.Features.Companies.Queries
 {
     public class GetCompanyByIdQueryHandler : IRequestHandler<GetCompanyByIdQuery, Result<CompanyDto>>
     {
+        private readonly ICompanyRepository _companyRepository;
+        private readonly ILogger<GetCompanyByIdQueryHandler> _logger;
+
+        public GetCompanyByIdQueryHandler(
+            ICompanyRepository companyRepository,
+            ILogger<GetCompanyByIdQueryHandler> logger)
+        {
+            _companyRepository = companyRepository;
+            _logger = logger;
+        }
 
         public async Task<Result<CompanyDto>> Handle(GetCompanyByIdQuery request, CancellationToken cancellationToken)
 
-                   {
-            // Simulate fetching company data from a database or external service
-            var companyDto = new CompanyDto
+        {
+            try
             {
-                Id = request.Id,
-                Name = "Sample Company",
-                Ticker = "SMP",
-                Exchange = "NYSE",
-                Isin = "US1234567890",
-                Website = "https://www.samplecompany.com",
-                CreatedAt = DateTime.UtcNow.AddYears(-1),
-                UpdatedAt = DateTime.UtcNow
-            };
-            // In a real application, you would check if the company exists and return an error if not found
-            if (companyDto.Id <= 0)
-            {
-                return Result.Failure<CompanyDto>("Company not found");
+                var company = await _companyRepository.GetByIdAsync(request.Id, cancellationToken);
+
+                if (company == null)
+                {
+                    _logger.LogDebug("Company with ID {CompanyId} not found", request.Id);
+                    return Result.Failure<CompanyDto>($"Company with ID {request.Id} not found");
+                }
+
+                return Result.Success(new CompanyDto(company.Id, company.Name, company.Ticker, company.Exchange, company.Isin, company.Website, company.CreatedAt, company.UpdatedAt));
+
             }
-            return Result.Success(companyDto);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving company by ID {CompanyId}", request.Id);
+                return Result.Failure<CompanyDto>("An error occurred while retrieving the company");
+            }
         }
     }
 }
