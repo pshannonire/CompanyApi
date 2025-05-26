@@ -1,5 +1,6 @@
 ﻿using CompanyAPI.Application.Features.Companies.Commands.CreateCompany;
 using CompanyAPI.Application.Features.Companies.DTOs;
+using CompanyAPI.Application.Features.Companies.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
