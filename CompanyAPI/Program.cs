@@ -1,3 +1,6 @@
+using CompanyAPI.Application;
+using CompanyAPI.Infrastructure;
+using CompanyAPI.Infrastructure.Data;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +11,8 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddApplication();
+builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Host.UseSerilog((context, configuration) =>
 {
@@ -30,6 +35,18 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+}
+
+try
+{
+    Log.Information("Initializing Company API with in-memory database...");
+    await DatabaseInitializer.InitializeAsync(app.Services);
+    Log.Information("Database initialization completed successfully");
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Database initialization failed. Application cannot start.");
+    throw;
 }
 
 app.UseHttpsRedirection();
