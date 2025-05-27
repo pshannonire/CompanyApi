@@ -23,5 +23,10 @@ namespace CompanyAPI.Domain.Entities
             Isin = isin;
             Website = website;
         }
+
+        public void SetUpdatedDate()
+        {
+            UpdatedAt = DateTime.UtcNow;
+        }
     }
 }

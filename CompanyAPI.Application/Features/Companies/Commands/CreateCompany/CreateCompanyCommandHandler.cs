@@ -9,8 +9,6 @@ namespace CompanyAPI.Application.Features.Companies.Commands.CreateCompany
 {
     public class CreateCompanyCommandHandler : IRequestHandler<CreateCompanyCommand, Result<CompanyDto>>
     {
-
-
         private readonly ILogger<CreateCompanyCommandHandler> _logger;
         private readonly ICompanyRepository _companyRepository;
         public CreateCompanyCommandHandler(ICompanyRepository companyRepository, ILogger<CreateCompanyCommandHandler> logger)
@@ -24,13 +22,18 @@ namespace CompanyAPI.Application.Features.Companies.Commands.CreateCompany
             try
             {
 
+                if (await _companyRepository.ExistsByIsinAsync(request.Isin, cancellationToken))
+                {
+                    _logger.LogWarning("Attempt to create company with duplicate ISIN: {Isin}", request.Isin);
+                    return Result.Failure<CompanyDto>($"A company with ISIN {request.Isin} already exists");
+                }
+
                 var company = new Company(
                        request.Name,
                        request.Ticker,
                        request.Exchange,
                        request.Isin,
                        request.Website);
-
 
                 var saveResult = _companyRepository.AddAsync(company, cancellationToken);
 

@@ -1,6 +1,7 @@
 using CompanyAPI.Application;
 using CompanyAPI.Infrastructure;
 using CompanyAPI.Infrastructure.Data;
+using CompanyAPI.Middleware;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -50,7 +51,7 @@ catch (Exception ex)
 }
 
 app.UseHttpsRedirection();
-
+app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseAuthorization();
 
 app.MapControllers();

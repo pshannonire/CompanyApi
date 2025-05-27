@@ -1,4 +1,6 @@
-﻿using CompanyAPI.Application.Features.Companies.Commands.CreateCompany;
+﻿using CompanyAPI.Application.Common.Models;
+using CompanyAPI.Application.Features.Companies.Commands.CreateCompany;
+using CompanyAPI.Application.Features.Companies.Commands.UpdateCompany;
 using CompanyAPI.Application.Features.Companies.DTOs;
 using CompanyAPI.Application.Features.Companies.Queries;
 using MediatR;
@@ -21,7 +23,7 @@ namespace CompanyAPI.Controllers
         }
 
         /// <summary>
-        /// Create Compmany
+        /// Create Company
         /// </summary>
         /// <param name="command">Company creation data</param>
         /// <returns>Created company</returns>
@@ -42,6 +44,28 @@ namespace CompanyAPI.Controllers
             return CreatedAtAction(nameof(GetCompanyById), new { id = result.Value.Id }, result.Value);
         }
 
+        /// <summary>
+        /// Update Company
+        /// </summary>
+        /// <param name="command">Company to update</param>
+        /// <returns>Updated company</returns>
+        [HttpPut]
+        [ProducesResponseType(typeof(CompanyDto), 200)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<CompanyDto>> UpdateCompany([FromBody] UpdateCompanyCommand command)
+        {
+            var result = await _mediator.Send(command);
+
+            if (!result.IsSuccess)
+            {
+                _logger.LogWarning("Failed to update company: {Error}", result.Error);
+                return BadRequest(new { error = result.Error });
+            }
+
+            _logger.LogInformation("Updated company with ID {CompanyId}", result.Value!.Id);
+            return Ok(result.Value);
+        }
+
         /// Get Company by ID
         /// </summary>
         /// <param name="id">Company ID</param>
@@ -59,6 +83,72 @@ namespace CompanyAPI.Controllers
                 _logger.LogWarning("Company with ID {CompanyId} not found", id);
                 return NotFound(new { error = result.Error });
             }
+
+            return Ok(result.Value);
+        }
+
+
+        /// Get Company by ISIN
+        /// </summary>
+        /// <param name="isin">ISIN</param>
+        /// <returns>Company details</returns>
+        [HttpGet("{isin}")]
+        [ProducesResponseType(typeof(CompanyDto), 200)]
+        [ProducesResponseType(404)]
+        public async Task<ActionResult<CompanyDto>> GetCompanyByIsin(string isin)
+        {
+            var query = new GetCompanyByIsinQuery(isin);
+            var result = await _mediator.Send(query);
+
+            if (!result.IsSuccess)
+            {
+                _logger.LogWarning("Company with ISIN {ISIN} not found", isin);
+                return NotFound(new { error = result.Error });
+            }
+
+            return Ok(result.Value);
+        }
+
+        /// <summary>
+        /// Get all companies with pagination
+        /// </summary>
+        /// <param name="page">Page number</param>
+        /// <param name="pageSize">Page size</param>
+        /// <param name="sortBy">Sort field</param>
+        /// <param name="sortDescending">Sort direction</param>
+        /// <param name="searchTerm">Search term</param>
+        /// <param name="exchange">Filter by exchange</param>
+        /// <returns>Paginated list of companies</returns>
+        [HttpGet]
+        [ProducesResponseType(typeof(PaginatedList<CompanyDto>), 200)]
+        public async Task<ActionResult<PaginatedList<CompanyDto>>> GetAllCompanies(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? sortBy = null,
+            [FromQuery] bool sortDescending = false,
+            [FromQuery] string? searchTerm = null,
+            [FromQuery] string? exchange = null)
+        {
+            var query = new GetAllCompaniesQuery
+            {
+                Page = page,
+                PageSize = pageSize,
+                SortBy = sortBy,
+                SortDescending = sortDescending,
+                SearchTerm = searchTerm,
+                Exchange = exchange
+            };
+
+            var result = await _mediator.Send(query);
+
+            if (!result.IsSuccess)
+            {
+                _logger.LogError("Failed to retrieve companies: {Error}", result.Error);
+                return BadRequest(new { error = result.Error });
+            }
+
+            _logger.LogInformation("Retrieved {CompanyCount} companies (page {Page} of {TotalPages})",
+                result.Value!.Items.Count, result.Value.PageNumber, result.Value.TotalPages);
 
             return Ok(result.Value);
         }
