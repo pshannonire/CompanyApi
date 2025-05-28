@@ -1,6 +1,7 @@
 ﻿using CompanyAPI.Application.Common.Interfaces.Companies;
 using CompanyAPI.Application.Common.Models;
 using CompanyAPI.Application.Features.Companies.DTOs;
+using CompanyAPI.Application.Features.Companies.Extensions;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -20,26 +21,16 @@ namespace CompanyAPI.Application.Features.Companies.Queries
         }
 
         public async Task<Result<CompanyDto>> Handle(GetCompanyByIdQuery request, CancellationToken cancellationToken)
-
         {
-            try
+            var company = await _companyRepository.GetByIdAsync(request.Id, cancellationToken);
+
+            if (company == null)
             {
-                var company = await _companyRepository.GetByIdAsync(request.Id, cancellationToken);
-
-                if (company == null)
-                {
-                    _logger.LogDebug("Company with ID {CompanyId} not found", request.Id);
-                    return Result.Failure<CompanyDto>($"Company with ID {request.Id} not found");
-                }
-
-                return Result.Success(new CompanyDto(company.Id, company.Name, company.Ticker, company.Exchange, company.Isin, company.Website, company.CreatedAt, company.UpdatedAt));
-
+                _logger.LogDebug("Company with ID {CompanyId} not found", request.Id);
+                return Result.Failure<CompanyDto>($"Company with ID {request.Id} not found");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving company by ID {CompanyId}", request.Id);
-                return Result.Failure<CompanyDto>("An error occurred while retrieving the company");
-            }
+
+            return Result.Success(company.ToDto());
         }
     }
 }

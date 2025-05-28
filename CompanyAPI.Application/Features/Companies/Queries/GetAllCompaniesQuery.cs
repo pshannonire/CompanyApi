@@ -10,6 +10,5 @@ namespace CompanyAPI.Application.Features.Companies.Queries
         public string? SortBy { get; set; }
         public bool SortDescending { get; set; } = false;
         public string? SearchTerm { get; set; }
-        public string? Exchange { get; set; }
     }
 }

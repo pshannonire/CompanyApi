@@ -1,6 +1,7 @@
 ﻿using CompanyAPI.Application.Common.Interfaces.Companies;
 using CompanyAPI.Application.Common.Models;
 using CompanyAPI.Application.Features.Companies.DTOs;
+using CompanyAPI.Application.Features.Companies.Extensions;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -21,35 +22,23 @@ namespace CompanyAPI.Application.Features.Companies.Queries
 
         public async Task<Result<PaginatedList<CompanyDto>>> Handle(GetAllCompaniesQuery request, CancellationToken cancellationToken)
         {
-            try
-            {
-                var (companies, totalCount) = await _companyRepository.GetAllAsync(
-                    request.Page,
-                    request.PageSize,
-                    cancellationToken);
+            var (companies, totalCount) = await _companyRepository.GetAllAsync(
+                request.Page,
+                request.PageSize,
+                request.SortBy,
+                request.SortDescending,
+                request.SearchTerm,
+                cancellationToken);
 
-                var companyDtos = companies.Select(c => new CompanyDto(
-                    c.Id,
-                    c.Name,
-                    c.Ticker,
-                    c.Exchange,
-                    c.Isin,
-                    c.Website,
-                    c.CreatedAt,
-                    c.UpdatedAt)).ToList();
+            var companyDtos = companies.ToDto();
 
-                var paginatedList = new PaginatedList<CompanyDto>(companyDtos, totalCount, request.Page, request.PageSize);
+            var paginatedList = new PaginatedList<CompanyDto>(companyDtos, totalCount, request.Page, request.PageSize);
 
-                _logger.LogInformation("Retrieved {CompanyCount} companies (page {Page} of {TotalPages})",
-                    companyDtos.Count, request.Page, paginatedList.TotalPages);
+            _logger.LogInformation("Retrieved {CompanyCount} companies (page {Page} of {TotalPages})",
+                companyDtos.Count, request.Page, paginatedList.TotalPages);
 
-                return Result.Success(paginatedList);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving companies");
-                return Result.Failure<PaginatedList<CompanyDto>>("An error occurred while retrieving companies");
-            }
+            return Result.Success(paginatedList);
+
         }
 
     }

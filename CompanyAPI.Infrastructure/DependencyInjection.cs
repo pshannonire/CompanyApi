@@ -1,6 +1,7 @@
 ﻿using CompanyAPI.Application.Common.Interfaces;
 using CompanyAPI.Application.Common.Interfaces.Companies;
 using CompanyAPI.Infrastructure.Data;
+using CompanyAPI.Infrastructure.Repositories;
 using CompanyAPI.Infrastructure.Repositories.Companies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -18,6 +19,7 @@ namespace CompanyAPI.Infrastructure
 
             services.AddScoped<ApplicationDbContext>();
             services.AddScoped<ICompanyRepository, CompanyRepository>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 
             services.AddScoped<IApplicationDbContext>(provider =>

@@ -17,7 +17,7 @@ namespace CompanyAPI.Infrastructure.Data.Configurations
 
             builder.Property(c => c.Name)
                 .IsRequired()
-                .HasMaxLength(200);
+                .HasMaxLength(100);
 
             builder.Property(c => c.Ticker)
                 .IsRequired()
@@ -29,9 +29,10 @@ namespace CompanyAPI.Infrastructure.Data.Configurations
 
             builder.Property(c => c.Isin)
              .IsRequired()
-             .HasMaxLength(100);
+             .HasMaxLength(12);
 
-            builder.Property(c => c.Website);
+            builder.Property(c => c.Website)
+                .HasMaxLength(100); 
 
             builder.Property(c => c.CreatedAt)
                 .IsRequired();

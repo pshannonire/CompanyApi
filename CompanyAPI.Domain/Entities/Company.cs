@@ -17,15 +17,22 @@ namespace CompanyAPI.Domain.Entities
         private Company() { }
         public Company(string name, string ticker, string exchange, string isin, string? website = null)
         {
-            Name = name;
-            Ticker = ticker;
-            Exchange = exchange;
-            Isin = isin;
+
+            Name = name.Trim();
+            Ticker = ticker.Trim().ToUpper();
+            Exchange = exchange.Trim();
+            Isin = isin.Trim().ToUpper();
             Website = website;
         }
 
-        public void SetUpdatedDate()
+        public void Update(string name, string ticker, string exchange, string isin, string? website = null)
         {
+
+            Name = name.Trim();
+            Ticker = ticker.Trim().ToUpper();
+            Exchange = exchange.Trim();
+            Isin = isin.Trim().ToUpper();
+            Website = website;
             UpdatedAt = DateTime.UtcNow;
         }
     }

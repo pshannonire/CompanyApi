@@ -6,6 +6,10 @@ namespace CompanyAPI.Application.Features.Companies.Commands.UpdateCompany
     {
         public UpdateCompanyCommandValidator()
         {
+            RuleFor(x => x.Id)
+                .NotEmpty().WithMessage("Id is required")
+                .GreaterThan(0).WithMessage("Id must be greater than 0");
+
             RuleFor(x => x.Name)
                 .NotEmpty().WithMessage("Company name is required")
                 .MaximumLength(100).WithMessage("Company name must not exceed 100 characters");
@@ -25,7 +29,7 @@ namespace CompanyAPI.Application.Features.Companies.Commands.UpdateCompany
                 .WithMessage("ISIN must start with 2 letters followed by 10 alphanumeric characters");
 
             RuleFor(x => x.Website)
-                .MaximumLength(500).WithMessage("Website URL must not exceed 100 characters")
+                .MaximumLength(100).WithMessage("Website URL must not exceed 100 characters")
                 .Must(BeValidUrl).WithMessage("Website must be a valid URL")
                 .When(x => !string.IsNullOrWhiteSpace(x.Website));
         }

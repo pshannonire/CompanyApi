@@ -1,7 +1,10 @@
-﻿using CompanyAPI.Application.Common.Interfaces.Companies;
+﻿using CompanyAPI.Application.Common.Interfaces;
+using CompanyAPI.Application.Common.Interfaces.Companies;
 using CompanyAPI.Application.Common.Models;
 using CompanyAPI.Application.Features.Companies.DTOs;
+using CompanyAPI.Application.Features.Companies.Extensions;
 using CompanyAPI.Domain.Entities;
+using CompanyAPI.Domain.ValueObjects;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -11,16 +14,17 @@ namespace CompanyAPI.Application.Features.Companies.Commands.UpdateCompany
     {
         private readonly ILogger<UpdateCompanyCommandHandler> _logger;
         private readonly ICompanyRepository _companyRepository;
-        public UpdateCompanyCommandHandler(ICompanyRepository companyRepository, ILogger<UpdateCompanyCommandHandler> logger)
+        private readonly IUnitOfWork _unitOfWork;
+        public UpdateCompanyCommandHandler(ICompanyRepository companyRepository, ILogger<UpdateCompanyCommandHandler> logger, IUnitOfWork unitOfWork)
         {
             _companyRepository = companyRepository;
             _logger = logger;
+            _unitOfWork = unitOfWork;
         }
         public async Task<Result<CompanyDto>> Handle(UpdateCompanyCommand request, CancellationToken cancellationToken)
         {
 
-            try
-            {
+                var isin = new Isin(request.Isin);
                 var existingCompany = await _companyRepository.GetByIdAsync(request.Id, cancellationToken);
 
                 if (existingCompany == null)
@@ -30,35 +34,24 @@ namespace CompanyAPI.Application.Features.Companies.Commands.UpdateCompany
                 }
 
                 // Validate ISIN uniqueness if it is being changed
-                if (existingCompany.Isin != request.Isin &&
-                    await _companyRepository.ExistsByIsinAsync(request.Isin, cancellationToken))
+                if (existingCompany.Isin != isin &&
+                    await _companyRepository.ExistsByIsinAsync(isin, cancellationToken))
                 {
-                    _logger.LogWarning("Attempt to update company with duplicate ISIN: {Isin}", request.Isin);
-                    return Result.Failure<CompanyDto>($"A company with ISIN {request.Isin} already exists");
+                    _logger.LogWarning("Attempt to update company with duplicate ISIN: {Isin}", isin);
+                    return Result.Failure<CompanyDto>($"A company with ISIN {isin} already exists");
                 }
 
+                existingCompany.Update(request.Name, request.Ticker, request.Exchange, isin, request.Website);
 
 
-                var company = new Company(
-                       request.Name,
-                       request.Ticker,
-                       request.Exchange,
-                       request.Isin,
-                       request.Website);
-                company.SetUpdatedDate();
-
-                await _companyRepository.Update(company, cancellationToken);
+                await _companyRepository.Update(existingCompany, cancellationToken);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
 
                 _logger.LogInformation("Successfully updated company with ID {CompanyId} and ISIN {Isin}",
-                 company.Id, company.Isin);
+                 existingCompany.Id, existingCompany.Isin);
 
-                return Result.Success(new CompanyDto(company.Id, company.Name, company.Ticker, company.Exchange, company.Isin, company.Website, company.CreatedAt, company.UpdatedAt));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating company with ISIN {Isin}", request.Isin);
-                return Result.Failure<CompanyDto>("An error occurred while creating the company");
-            }
+                return Result.Success(existingCompany.ToDto());
+            
         }
     }
 }

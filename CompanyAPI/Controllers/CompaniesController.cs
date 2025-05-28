@@ -116,8 +116,7 @@ namespace CompanyAPI.Controllers
         /// <param name="pageSize">Page size</param>
         /// <param name="sortBy">Sort field</param>
         /// <param name="sortDescending">Sort direction</param>
-        /// <param name="searchTerm">Search term</param>
-        /// <param name="exchange">Filter by exchange</param>
+        /// <param name="searchTerm">Search term (filter on ISIN, Exchange, Company name or Ticker</param>
         /// <returns>Paginated list of companies</returns>
         [HttpGet]
         [ProducesResponseType(typeof(PaginatedList<CompanyDto>), 200)]
@@ -136,7 +135,6 @@ namespace CompanyAPI.Controllers
                 SortBy = sortBy,
                 SortDescending = sortDescending,
                 SearchTerm = searchTerm,
-                Exchange = exchange
             };
 
             var result = await _mediator.Send(query);

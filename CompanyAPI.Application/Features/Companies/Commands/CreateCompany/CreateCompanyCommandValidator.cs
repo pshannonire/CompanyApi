@@ -25,7 +25,7 @@ namespace CompanyAPI.Application.Features.Companies.Commands.CreateCompany
                 .WithMessage("ISIN must start with 2 letters followed by 10 alphanumeric characters");
 
             RuleFor(x => x.Website)
-                .MaximumLength(500).WithMessage("Website URL must not exceed 100 characters")
+                .MaximumLength(100).WithMessage("Website URL must not exceed 100 characters")
                 .Must(BeValidUrl).WithMessage("Website must be a valid URL")
                 .When(x => !string.IsNullOrWhiteSpace(x.Website));
         }
