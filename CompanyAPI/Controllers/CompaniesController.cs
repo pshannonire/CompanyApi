@@ -4,6 +4,7 @@ using CompanyAPI.Application.Features.Companies.Commands.UpdateCompany;
 using CompanyAPI.Application.Features.Companies.DTOs;
 using CompanyAPI.Application.Features.Companies.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,6 +12,7 @@ namespace CompanyAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CompaniesController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -22,49 +24,6 @@ namespace CompanyAPI.Controllers
             _logger = logger;
         }
 
-        /// <summary>
-        /// Create Company
-        /// </summary>
-        /// <param name="command">Company creation data</param>
-        /// <returns>Created company</returns>
-        [HttpPost]
-        [ProducesResponseType(typeof(CompanyDto), 201)]
-        [ProducesResponseType(400)]
-        public async Task<ActionResult<CompanyDto>> CreateCompany([FromBody] CreateCompanyCommand command)
-        {
-            var result = await _mediator.Send(command);
-
-            if (!result.IsSuccess)
-            {
-                _logger.LogWarning("Failed to create company: {Error}", result.Error);
-                return BadRequest(new { error = result.Error });
-            }
-
-            _logger.LogInformation("Created company with ID {CompanyId}", result.Value!.Id);
-            return CreatedAtAction(nameof(GetCompanyById), new { id = result.Value.Id }, result.Value);
-        }
-
-        /// <summary>
-        /// Update Company
-        /// </summary>
-        /// <param name="command">Company to update</param>
-        /// <returns>Updated company</returns>
-        [HttpPut]
-        [ProducesResponseType(typeof(CompanyDto), 200)]
-        [ProducesResponseType(400)]
-        public async Task<ActionResult<CompanyDto>> UpdateCompany([FromBody] UpdateCompanyCommand command)
-        {
-            var result = await _mediator.Send(command);
-
-            if (!result.IsSuccess)
-            {
-                _logger.LogWarning("Failed to update company: {Error}", result.Error);
-                return BadRequest(new { error = result.Error });
-            }
-
-            _logger.LogInformation("Updated company with ID {CompanyId}", result.Value!.Id);
-            return Ok(result.Value);
-        }
 
         /// Get Company by ID
         /// </summary>
@@ -148,6 +107,50 @@ namespace CompanyAPI.Controllers
             _logger.LogInformation("Retrieved {CompanyCount} companies (page {Page} of {TotalPages})",
                 result.Value!.Items.Count, result.Value.PageNumber, result.Value.TotalPages);
 
+            return Ok(result.Value);
+        }
+
+        /// <summary>
+        /// Create Company
+        /// </summary>
+        /// <param name="command">Company creation data</param>
+        /// <returns>Created company</returns>
+        [HttpPost]
+        [ProducesResponseType(typeof(CompanyDto), 201)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<CompanyDto>> CreateCompany([FromBody] CreateCompanyCommand command)
+        {
+            var result = await _mediator.Send(command);
+
+            if (!result.IsSuccess)
+            {
+                _logger.LogWarning("Failed to create company: {Error}", result.Error);
+                return BadRequest(new { error = result.Error });
+            }
+
+            _logger.LogInformation("Created company with ID {CompanyId}", result.Value!.Id);
+            return CreatedAtAction(nameof(GetCompanyById), new { id = result.Value.Id }, result.Value);
+        }
+
+        /// <summary>
+        /// Update Company
+        /// </summary>
+        /// <param name="command">Company to update</param>
+        /// <returns>Updated company</returns>
+        [HttpPut]
+        [ProducesResponseType(typeof(CompanyDto), 200)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<CompanyDto>> UpdateCompany([FromBody] UpdateCompanyCommand command)
+        {
+            var result = await _mediator.Send(command);
+
+            if (!result.IsSuccess)
+            {
+                _logger.LogWarning("Failed to update company: {Error}", result.Error);
+                return BadRequest(new { error = result.Error });
+            }
+
+            _logger.LogInformation("Updated company with ID {CompanyId}", result.Value!.Id);
             return Ok(result.Value);
         }
     }

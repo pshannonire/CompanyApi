@@ -1,4 +1,5 @@
 using CompanyAPI.Application;
+using CompanyAPI.Extensions;
 using CompanyAPI.Infrastructure;
 using CompanyAPI.Infrastructure.Data;
 using CompanyAPI.Middleware;
@@ -8,10 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddWebApiServices(builder.Configuration);
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
@@ -50,9 +48,10 @@ catch (Exception ex)
     throw;
 }
 
+
+
 app.UseHttpsRedirection();
 app.UseMiddleware<GlobalExceptionMiddleware>();
-app.UseAuthorization();
 
 app.MapControllers();
 
