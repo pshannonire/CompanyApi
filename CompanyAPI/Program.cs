@@ -4,6 +4,7 @@ using CompanyAPI.Infrastructure;
 using CompanyAPI.Infrastructure.Data;
 using CompanyAPI.Middleware;
 using Serilog;
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +13,17 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddWebApiServices(builder.Configuration);
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:4200")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
 
 builder.Host.UseSerilog((context, configuration) =>
 {
@@ -52,7 +64,10 @@ catch (Exception ex)
 
 app.UseHttpsRedirection();
 app.UseMiddleware<GlobalExceptionMiddleware>();
+app.UseCors(MyAllowSpecificOrigins);
 
 app.MapControllers();
 
 app.Run();
+
+public partial class Program();

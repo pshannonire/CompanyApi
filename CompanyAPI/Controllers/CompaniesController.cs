@@ -51,7 +51,7 @@ namespace CompanyAPI.Controllers
         /// </summary>
         /// <param name="isin">ISIN</param>
         /// <returns>Company details</returns>
-        [HttpGet("{isin}")]
+        [HttpGet("isin/{isin}")]
         [ProducesResponseType(typeof(CompanyDto), 200)]
         [ProducesResponseType(404)]
         public async Task<ActionResult<CompanyDto>> GetCompanyByIsin(string isin)
@@ -80,7 +80,7 @@ namespace CompanyAPI.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(PaginatedList<CompanyDto>), 200)]
         public async Task<ActionResult<PaginatedList<CompanyDto>>> GetAllCompanies(
-            [FromQuery] int page = 1,
+            [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10,
             [FromQuery] string? sortBy = null,
             [FromQuery] bool sortDescending = false,
@@ -89,7 +89,7 @@ namespace CompanyAPI.Controllers
         {
             var query = new GetAllCompaniesQuery
             {
-                Page = page,
+                Page = pageNumber,
                 PageSize = pageSize,
                 SortBy = sortBy,
                 SortDescending = sortDescending,
@@ -137,11 +137,12 @@ namespace CompanyAPI.Controllers
         /// </summary>
         /// <param name="command">Company to update</param>
         /// <returns>Updated company</returns>
-        [HttpPut]
+        [HttpPut("{id:int}")]
         [ProducesResponseType(typeof(CompanyDto), 200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<CompanyDto>> UpdateCompany([FromBody] UpdateCompanyCommand command)
+        public async Task<ActionResult<CreateCompanyDto>> UpdateCompany([FromBody] UpdateCompanyCommand command)
         {
+            command.Id = int.Parse(RouteData.Values["id"]?.ToString() ?? "0");
             var result = await _mediator.Send(command);
 
             if (!result.IsSuccess)

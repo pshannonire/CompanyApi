@@ -22,7 +22,7 @@ namespace CompanyAPI.Domain.Entities
             Ticker = ticker.Trim().ToUpper();
             Exchange = exchange.Trim();
             Isin = isin.Trim().ToUpper();
-            Website = website;
+            Website = website?.Trim();
         }
 
         public void Update(string name, string ticker, string exchange, string isin, string? website = null)
@@ -32,7 +32,7 @@ namespace CompanyAPI.Domain.Entities
             Ticker = ticker.Trim().ToUpper();
             Exchange = exchange.Trim();
             Isin = isin.Trim().ToUpper();
-            Website = website;
+            Website = website?.Trim();
             UpdatedAt = DateTime.UtcNow;
         }
     }

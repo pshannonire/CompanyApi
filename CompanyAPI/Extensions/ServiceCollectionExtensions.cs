@@ -67,15 +67,7 @@ namespace CompanyAPI.Extensions
 
             services.AddAuthorization();
 
-            services.AddCors(options =>
-            {
-                options.AddPolicy("AllowAll", builder =>
-                {
-                    builder.AllowAnyOrigin()
-                           .AllowAnyMethod()
-                           .AllowAnyHeader();
-                });
-            });
+          
 
             return services;
         }
