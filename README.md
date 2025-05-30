@@ -4,6 +4,27 @@
 
 ---
 
+## Instructions to run
+- In Visual Studio, select the IIS Express launch profile and run the project.
+	- The API will be available at: https://localhost:44374/
+- Obtain a bearer token from https://localhost:44374/api/Auth/login 
+- Example POST https://localhost:44374/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "password123"
+}
+
+- Use the bearer token retrieved to call all the other endpoints
+- Example using Postman:
+		- Set the method to GET
+		- URL: GET https://localhost:44374/api/companies/1
+        - Go to Authorization tab
+        - Choose Bearer Token
+        - Paste your token
+
+
 ##  Overview
 
 **CompanyAPI** is an ASP.NET Core Web API designed for scalability, maintainability, and clarity.
