@@ -84,8 +84,7 @@ namespace CompanyAPI.Controllers
             [FromQuery] int pageSize = 10,
             [FromQuery] string? sortBy = null,
             [FromQuery] bool sortDescending = false,
-            [FromQuery] string? searchTerm = null,
-            [FromQuery] string? exchange = null)
+            [FromQuery] string? searchTerm = null)
         {
             var query = new GetAllCompaniesQuery
             {
