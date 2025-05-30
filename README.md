@@ -74,8 +74,8 @@ It allows clients to get/add and update companies, with secure authentication, v
 ---
 
 ##  Future Improvements 
--- add caching to endpoints via IMemoryCache or Redis Cache to increase the speed of data retreival
--- add domain events to eventually enable sending events via Kafka
--- create more in depth authentication, different roles for users of api etc.
--- add docker support 
+- add caching to endpoints via IMemoryCache or Redis Cache to increase the speed of data retreival
+- add domain events to eventually enable sending events via Kafka
+- create more in depth authentication, different roles for users of api etc.
+- add docker support 
 
